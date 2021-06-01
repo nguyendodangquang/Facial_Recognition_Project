@@ -2,32 +2,40 @@ import cv2, os, random
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
+import streamlit as st
 # import h5py
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img, load_img
+
+IMG_WIDTH, IMG_HEIGHT = 416, 416
+model = tf.keras.models.load_model("./model/face_detect_model.h5")
+MODEL = './yolo/yolov3-face.cfg'
+WEIGHT = './yolo/yolov3-wider_16000.weights'
+img_folder_path = './image'
+
+# 3 line below is for running on streamlit
+# st.title("Webcam Live Feed")
+# run = st.checkbox('Run')
+# FRAME_WINDOW = st.image([])
 
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 # Check camera
 if not cap.isOpened():
     raise IOError("Cannot open webcam")
 
-MODEL = 'C:/Users/Dang Quang/Facial_Recognition/yolo/yolov3-face.cfg'
-WEIGHT = 'C:/Users/Dang Quang/Facial_Recognition/yolo/yolov3-wider_16000.weights'
-
 net = cv2.dnn.readNetFromDarknet(MODEL, WEIGHT)
+
+# Use this 2 line if your OpenCV run on GPU
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
+# Use this 2 line if your OpenCV run on CPU
 # net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
 # net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-IMG_WIDTH, IMG_HEIGHT = 416, 416
-model = tf.keras.models.load_model("./model/face_detect_model.h5")
-# model = h5py.File('Model.h5', 'r')
-
 # Auto labeling
-path = 'C:/Users/Dang Quang/Facial_Recognition/image'
-folder_list = os.listdir(path)
+folder_list = os.listdir(img_folder_path)
 folder_list.sort()
 labels = {}
 for i in range(len(folder_list)):
@@ -117,8 +125,10 @@ while True:
     
     cv2.imshow('face detection', result)
 
+    # 2 line below is for running on streamlit
+    # result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB) 
+    # FRAME_WINDOW.image(result)
 
-    # cv2.imshow('Input', frame)
     c = cv2.waitKey(1)
     # Break when pressing ESC
     if c == 27:
